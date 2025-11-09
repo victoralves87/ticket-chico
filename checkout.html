@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - Ingresso</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 500px; margin-top: 40px;" id="checkout-container">
+  <h3 class="mb-4 text-center" id="event-name">Carregando evento...</h3>
+
+  <form id="checkout-form">
+    <div class="mb-3">
+      <label class="form-label">Nome Completo</label>
+      <input type="text" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">E-mail</label>
+      <input type="email" class="form-control" id="email" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">
+      Gerar PIX (R$ 10,00)
+    </button>
+  </form>
+</div>
+
+<script>
+  // Recuperar nome do evento pela URL
+  const params = new URLSearchParams(window.location.search);
+  const event = params.get("event") || "evento";
+  document.getElementById("event-name").innerHTML = "Comprar ingresso – " + event.replace(/-/g, " ");
+
+  // Ação do formulário
+  document.getElementById("checkout-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const response = await fetch("http://localhost:3001/create-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: event,
+        email: document.getElementById("email").value
+      })
+    });
+
+    const data = await response.json();
+
+    // Substituir conteúdo pelo QR Code
+    document.getElementById("checkout-container").innerHTML = `
+      <div class="text-center">
+        <h3 class="mb-4">Pagamento via PIX</h3>
+
+        <p class="mb-2">Valor do Ingresso:</p>
+        <h4><strong>R$ 10,00</strong></h4>
+
+        <p class="mt-4">Escaneie o QR Code abaixo:</p>
+        <img src="data:image/png;base64,${data.qr_base64}" class="img-fluid mb-4" />
+
+        <p class="mb-2">Ou copie o código PIX:</p>
+        <textarea id="pix-code" class="form-control mb-3" rows="3" readonly>${data.copy_and_paste}</textarea>
+
+        <button class="btn btn-outline-primary w-100 mb-3" onclick="copyPix()">
+          Copiar Código PIX
+        </button>
+
+        <p class="text-muted" style="font-size:14px;">Após pagar, volte para esta página.</p>
+      </div>
+    `;
+  });
+
+  // Função copiar PIX
+  function copyPix() {
+    const copyText = document.getElementById("pix-code");
+    navigator.clipboard.writeText(copyText.value);
+    alert("✅ Código PIX copiado!");
+  }
+</script>
+
+</body>
+</html>
