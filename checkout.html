@@ -42,14 +42,15 @@
   document.getElementById("checkout-form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:3001/create-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: event,
-        email: document.getElementById("email").value
-      })
-    });
+   const response = await fetch("https://ticket-chico.onrender.com/create-payment", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    title: event,
+    email: document.getElementById("email").value
+  })
+});
+
 
     const data = await response.json();
 

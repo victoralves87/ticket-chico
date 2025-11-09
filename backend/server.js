@@ -8,8 +8,9 @@ app.use(express.json());
 
 // Use seu ACCESS TOKEN
 const client = new MercadoPagoConfig({
-  accessToken: "APP_USR-1732774976826819-110910-30c771ffc8cb20e6caf412baf47408ee-452444709"
+  accessToken: process.env.MP_ACCESS_TOKEN
 });
+
 
 app.post("/create-payment", async (req, res) => {
   try {
