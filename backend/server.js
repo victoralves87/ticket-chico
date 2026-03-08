@@ -23,7 +23,7 @@ app.post("/create-payment", async (req, res) => {
 
     const response = await payment.create({
       body: {
-        transaction_amount: 10.00,
+        transaction_amount: 1.00,
         description: title || "Ingresso",
         payment_method_id: "pix",
 
@@ -43,7 +43,7 @@ app.post("/create-payment", async (req, res) => {
     return res.json({
       qr_base64: data.qr_code_base64,
       copy_and_paste: data.qr_code,
-      amount: 10.00
+      amount: 1.00
     });
 
   } catch (error) {
