@@ -1,88 +1,160 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Checkout - Ingresso</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <style>
-    body {
-      background: #f8f9fa;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Checkout - Ingresso</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+<style>
+
+body{
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: system-ui;
+}
+
+.checkout-card{
+  background:white;
+  padding:35px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+.event-badge{
+  background:#0d6efd;
+  color:white;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:14px;
+}
+
+.price{
+  font-size:28px;
+  font-weight:bold;
+  color:#198754;
+}
+
+.pix-box{
+  background:#f8f9fa;
+  border-radius:8px;
+  padding:15px;
+}
+
+</style>
+
 </head>
+
 <body>
 
-<div class="container" style="max-width: 500px; margin-top: 40px;" id="checkout-container">
-  <h3 class="mb-4 text-center" id="event-name">Carregando evento...</h3>
+<div class="container" style="max-width:480px" id="checkout-container">
 
-  <form id="checkout-form">
-    <div class="mb-3">
-      <label class="form-label">Nome Completo</label>
-      <input type="text" class="form-control" required>
-    </div>
+<div class="checkout-card">
 
-    <div class="mb-3">
-      <label class="form-label">E-mail</label>
-      <input type="email" class="form-control" id="email" required>
-    </div>
+<div class="text-center mb-4">
+<h4 id="event-name">Carregando evento...</h4>
+<span class="event-badge">Ingresso</span>
+</div>
 
-    <button type="submit" class="btn btn-primary w-100">
-      Gerar PIX (R$ 10,00)
-    </button>
-  </form>
+<form id="checkout-form">
+
+<div class="mb-3">
+<label class="form-label">Nome completo</label>
+<input type="text" class="form-control" placeholder="Digite seu nome" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">E-mail</label>
+<input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+</div>
+
+<div class="text-center mb-3">
+<p class="mb-1">Valor do ingresso</p>
+<div class="price">R$ 10,00</div>
+</div>
+
+<button type="submit" class="btn btn-primary w-100 py-2">
+Gerar pagamento PIX
+</button>
+
+</form>
+
+</div>
+
 </div>
 
 <script>
-  // Recuperar nome do evento pela URL
-  const params = new URLSearchParams(window.location.search);
-  const event = params.get("event") || "evento";
-  document.getElementById("event-name").innerHTML = "Comprar ingresso – " + event.replace(/-/g, " ");
 
-  // Ação do formulário
-  document.getElementById("checkout-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
+// Nome evento
+const params = new URLSearchParams(window.location.search);
+const event = params.get("event") || "evento";
 
-   const response = await fetch("https://ticket-chico.onrender.com/create-payment", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    title: event,
-    email: document.getElementById("email").value
-  })
-});
+document.getElementById("event-name").innerHTML =
+"🎟️ " + event.replace(/-/g," ");
 
+document.getElementById("checkout-form").addEventListener("submit", async (e)=>{
 
-    const data = await response.json();
+e.preventDefault();
 
-    // Substituir conteúdo pelo QR Code
-    document.getElementById("checkout-container").innerHTML = `
-      <div class="text-center">
-        <h3 class="mb-4">Pagamento via PIX</h3>
+const response = await fetch("https://ticket-chico.onrender.com/create-payment",{
+method:"POST",
+headers:{ "Content-Type":"application/json"},
+body:JSON.stringify({
+title:event,
+email:document.getElementById("email").value
+})
+})
 
-        <p class="mb-2">Valor do Ingresso:</p>
-        <h4><strong>R$ 10,00</strong></h4>
+const data = await response.json();
 
-        <p class="mt-4">Escaneie o QR Code abaixo:</p>
-        <img src="data:image/png;base64,${data.qr_base64}" class="img-fluid mb-4" />
+document.getElementById("checkout-container").innerHTML = `
 
-        <p class="mb-2">Ou copie o código PIX:</p>
-        <textarea id="pix-code" class="form-control mb-3" rows="3" readonly>${data.copy_and_paste}</textarea>
+<div class="checkout-card text-center">
 
-        <button class="btn btn-outline-primary w-100 mb-3" onclick="copyPix()">
-          Copiar Código PIX
-        </button>
+<h3 class="mb-4">Pagamento PIX</h3>
 
-        <p class="text-muted" style="font-size:14px;">Após pagar, volte para esta página.</p>
-      </div>
-    `;
-  });
+<p class="mb-1">Valor do ingresso</p>
+<div class="price mb-4">R$ 10,00</div>
 
-  // Função copiar PIX
-  function copyPix() {
-    const copyText = document.getElementById("pix-code");
-    navigator.clipboard.writeText(copyText.value);
-    alert("✅ Código PIX copiado!");
-  }
+<p>Escaneie o QR Code</p>
+
+<img src="data:image/png;base64,${data.qr_base64}" class="img-fluid mb-4" style="max-width:230px">
+
+<div class="pix-box mb-3">
+
+<p class="mb-2">Copiar código PIX</p>
+
+<textarea id="pix-code" class="form-control mb-2" rows="3" readonly>${data.copy_and_paste}</textarea>
+
+<button class="btn btn-success w-100" onclick="copyPix()">
+Copiar código
+</button>
+
+</div>
+
+<p class="text-muted" style="font-size:14px">
+Após realizar o pagamento seu ingresso será confirmado.
+</p>
+
+</div>
+
+`
+
+})
+
+function copyPix(){
+
+const copyText = document.getElementById("pix-code")
+
+navigator.clipboard.writeText(copyText.value)
+
+alert("Código PIX copiado!")
+
+}
+
 </script>
 
 </body>
